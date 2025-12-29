@@ -17,4 +17,10 @@ app.use("/public", express.static(path.join(__dirname, "uploads")));
 app.use(express.json());
 app.use(cors());
 
+// Routes
+
+const authRoute = require("./routes/auth");
+
+app.use("/api/auth", authRoute);
+
 app.listen(PORT, () => console.log(`Server running on ${process.env.PORT}`));
