@@ -20,7 +20,9 @@ app.use(cors());
 // Routes
 
 const authRoute = require("./routes/auth");
+const adminRoute = require("./routes/admin");
 
-app.use("/api/auth", authRoute);
+app.use("/auth", authRoute);
+app.use("/admin", adminRoute);
 
 app.listen(PORT, () => console.log(`Server running on ${process.env.PORT}`));

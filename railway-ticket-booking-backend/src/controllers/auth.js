@@ -52,7 +52,7 @@ exports.login = async (req, res) => {
       const checkPassword = await bcrypt.compare(password, existUser.password);
       if (checkPassword) {
         const token = jwt.sign(
-          { userId: existUser._id },
+          { userId: existUser._id, role: existUser.role },
           process.env.JWT_AUTH_SECRET_KEY,
           { expiresIn: "1d" }
         );

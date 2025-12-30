@@ -20,10 +20,10 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    userType: {
+    role: {
       type: String,
-      enum: ["admin", "user", "manager"], // 👈 allowed values
-      default: "user",
+      enum: ["USER", "ADMIN"],
+      default: "USER",
     },
   },
   { timestamps: true, versionKey: false }

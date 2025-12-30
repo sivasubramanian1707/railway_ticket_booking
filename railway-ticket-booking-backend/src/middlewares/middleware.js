@@ -5,6 +5,28 @@ const { mail } = require("../helper/mailsFormat");
 const user = require("../models/user");
 const sendEmail = require("../utils/nodeMailer");
 
+exports.authMiddleware = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) return res.status(401).json({ message: "No token provided" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_AUTH_SECRET_KEY);
+    req.user = decoded; // { id, role }
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+};
+
+exports.adminOnly = (req, res, next) => {
+  console.log(req.user);
+  if (req.user.role !== "ADMIN") {
+    return res.status(403).json({ message: "Admin access only" });
+  }
+  next();
+};
+
 exports.otpVerifyAndsend = async (req, res, next) => {
   const { email, OTPToken, OTP } = req.body;
   const emailExist = await user.findOne({ email });
