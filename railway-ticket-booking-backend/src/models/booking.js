@@ -46,10 +46,12 @@ const BookingSchema = new mongoose.Schema(
       default: () => "PNR" + Date.now(),
     },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 // For fast availability check
 BookingSchema.index({ trainId: 1, travelDate: 1 });
 
-module.exports = mongoose.model("Booking", BookingSchema);
+const booking = mongoose.model("Booking", BookingSchema);
+
+module.exports = booking;

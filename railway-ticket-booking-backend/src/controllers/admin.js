@@ -1,3 +1,4 @@
+const booking = require("../models/booking");
 const station = require("../models/station");
 const train = require("../models/train");
 const trainRoute = require("../models/trainRoute");
@@ -62,4 +63,15 @@ exports.addRoute = async (req, res) => {
     console.log(err);
     res.status(400).json({ errorMessage: err.message });
   }
+};
+
+const getAllBookings = async (req, res) => {
+  const bookings = await booking
+    .find()
+    .populate("userId", "name email")
+    .populate("trainId", "trainName trainNumber")
+    .populate("fromStationId", "name code")
+    .populate("toStationId", "name code");
+
+  res.json(bookings);
 };

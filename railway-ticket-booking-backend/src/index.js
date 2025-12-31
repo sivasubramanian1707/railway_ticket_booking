@@ -21,8 +21,12 @@ app.use(cors());
 
 const authRoute = require("./routes/auth");
 const adminRoute = require("./routes/admin");
+const trainRoute = require("./routes/train");
+const bookingRoutes = require("./routes/booking");
 
 app.use("/auth", authRoute);
 app.use("/admin", adminRoute);
+app.use("/train", trainRoute);
+app.use("/booking", bookingRoutes);
 
 app.listen(PORT, () => console.log(`Server running on ${process.env.PORT}`));
