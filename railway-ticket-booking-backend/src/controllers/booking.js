@@ -57,9 +57,6 @@ exports.checkAvailablity = async (req, res) => {
 };
 
 exports.ticketBooking = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   console.log("Booking request data:", req.body.trainId);
   try {
     const {
@@ -102,14 +99,10 @@ exports.ticketBooking = async (req, res) => {
     const [fromStation, toStation] = await Promise.all([
       mongoose.Types.ObjectId.isValid(fromStationId)
         ? station.findById(fromStationId).session(session)
-        : station
-            .findOne({ code: String(fromStationId).toUpperCase() })
-            .session(session),
+        : station.findOne({ code: String(fromStationId).toUpperCase() }),
       mongoose.Types.ObjectId.isValid(toStationId)
         ? station.findById(toStationId).session(session)
-        : station
-            .findOne({ code: String(toStationId).toUpperCase() })
-            .session(session),
+        : station.findOne({ code: String(toStationId).toUpperCase() }),
     ]);
 
     if (!fromStation || !toStation) {
@@ -119,10 +112,10 @@ exports.ticketBooking = async (req, res) => {
     const fromStationObjectId = fromStation._id;
     const toStationObjectId = toStation._id;
 
-    const trainDetails = await train.findById(trainId).session(session);
+    const trainDetails = await train.findById(trainId);
     if (!trainDetails) throw new Error("Train not found");
 
-    const route = await trainRoute.findOne({ trainId }).session(session);
+    const route = await trainRoute.findOne({ trainId });
     if (!route) throw new Error("Route not found");
 
     const stationIdsOnRoute = route.stops.map((stop) =>
@@ -143,23 +136,21 @@ exports.ticketBooking = async (req, res) => {
     );
 
     // Check seat availability
-    const bookingStats = await booking
-      .aggregate([
-        {
-          $match: {
-            trainId: mongoose.Types.ObjectId.createFromHexString(trainId),
-            travelDate: new Date(travelDate),
-            status: "CONFIRMED",
-          },
+    const bookingStats = await booking.aggregate([
+      {
+        $match: {
+          trainId: mongoose.Types.ObjectId.createFromHexString(trainId),
+          travelDate: new Date(travelDate),
+          status: "CONFIRMED",
         },
-        {
-          $group: {
-            _id: null,
-            bookedSeats: { $sum: "$seatsBooked" },
-          },
+      },
+      {
+        $group: {
+          _id: null,
+          bookedSeats: { $sum: "$seatsBooked" },
         },
-      ])
-      .session(session);
+      },
+    ]);
 
     const bookedSeats = bookingStats[0]?.bookedSeats || 0;
 
@@ -168,20 +159,17 @@ exports.ticketBooking = async (req, res) => {
     }
 
     // Create booking
-    const bookingDetails = await booking.create(
-      [
-        {
-          userId,
-          trainId,
-          fromStationId: fromStationObjectId,
-          toStationId: toStationObjectId,
-          travelDate: new Date(travelDate),
-          seatsBooked,
-          totalFare: farePerSeat * seatsBooked,
-        },
-      ],
-      { session },
-    );
+    const bookingDetails = await booking.create([
+      {
+        userId,
+        trainId,
+        fromStationId: fromStationObjectId,
+        toStationId: toStationObjectId,
+        travelDate: new Date(travelDate),
+        seatsBooked,
+        totalFare: farePerSeat * seatsBooked,
+      },
+    ]);
 
     // Create passengers
     const passengerDocs = passengers.map((p) => ({
@@ -189,9 +177,7 @@ exports.ticketBooking = async (req, res) => {
       ...p,
     }));
 
-    await passanger.insertMany(passengerDocs, { session });
-
-    await session.commitTransaction();
+    await passanger.insertMany(passengerDocs);
 
     res.status(201).json({
       message: "Booking confirmed successfully",
@@ -201,10 +187,8 @@ exports.ticketBooking = async (req, res) => {
     });
   } catch (err) {
     console.error("Booking error:", err);
-    await session.abortTransaction();
     res.status(400).json({ error: err.message || "Booking failed" });
   } finally {
-    session.endSession();
   }
 };
 
