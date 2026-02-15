@@ -1,0 +1,157 @@
+/* Home page styles — mobile-first */
+:root {
+  --primary: #0a3d62;
+  --secondary: #1e5f74;
+  --accent: #f39c12;
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --border: #e6ecf3;
+}
+
+.home-page {
+  background: var(--bg);
+  color: #0b2130;
+}
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* HERO */
+.hero-section {
+  background: linear-gradient(135deg, var(--primary) 0%, #133e57 60%);
+  color: white;
+  padding: 48px 0;
+  border-radius: 0 0 24px 24px;
+}
+.hero-content {
+  padding: 24px;
+}
+.hero-title {
+  font-size: 28px;
+  line-height: 1.05;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.hero-sub {
+  font-size: 15px;
+  margin: 0 0 20px;
+  opacity: 0.95;
+}
+.hero-ctas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.inline-link {
+  display: inline-block;
+}
+.hero-illustration {
+  display: none;
+}
+
+/* Features */
+.features-section {
+  padding: 32px 0;
+}
+.section-title {
+  font-size: 20px;
+  margin: 0 0 16px;
+  font-weight: 600;
+}
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.feature-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--secondary), var(--primary));
+  box-shadow: 0 6px 16px rgba(10, 61, 98, 0.08);
+}
+.feature-title {
+  margin: 0;
+  font-weight: 600;
+}
+.feature-desc {
+  margin: 0;
+  color: #51646a;
+}
+
+/* CTA section */
+.cta-section {
+  background: rgba(243, 156, 18, 0.08);
+  padding: 32px;
+  border-radius: 12px;
+  margin: 24px 0;
+}
+.cta-inner {
+  text-align: center;
+}
+.cta-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.cta-sub {
+  margin: 8px 0 16px;
+  color: #51646a;
+}
+
+/* Responsive — tablet */
+@media (min-width: 768px) {
+  .home-container {
+    padding: 32px;
+  }
+  .hero-section {
+    padding: 64px 0;
+  }
+  .hero-illustration {
+    display: block;
+  }
+  .hero-ctas {
+    flex-direction: row;
+  }
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hero-title {
+    font-size: 36px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .home-container {
+    padding: 40px;
+  }
+  .hero-illustration {
+    flex: 1;
+  }
+  .hero-section {
+    padding: 80px 0;
+  }
+  .home-container {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+  .hero-content {
+    flex: 1;
+  }
+  .features-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .hero-title {
+    font-size: 48px;
+  }
+}

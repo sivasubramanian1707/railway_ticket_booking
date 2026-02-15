@@ -4,82 +4,139 @@ const bcrypt = require("bcrypt");
 const user = require("../models/user");
 const sendEmail = require("../utils/nodeMailer");
 const { mail } = require("../helper/mailsFormat");
+const { validateEmail, validatePassword } = require("../helper/validation");
 
 exports.signUp = async (req, res) => {
-  const { name, email, phoneNo, password } = req.body;
-  const userExist = await user
-    .findOne({ email })
-    .catch(() =>
-      res.status(200).json({ errorMessage: "Sorry Somthing Wrong" })
-    );
+  try {
+    const { name, email, phoneNo, password } = req.body;
 
-  if (userExist) {
-    res.status(200).json({ errorMessage: "Email Aldready Exist" });
-  } else {
+    // Input validation
+    if (!name || !email || !phoneNo || !password) {
+      return res.status(400).json({ errorMessage: "All fields are required" });
+    }
+
+    if (!validateEmail(email)) {
+      return res.status(400).json({ errorMessage: "Invalid email format" });
+    }
+
+    if (!validatePassword(password)) {
+      return res
+        .status(400)
+        .json({ errorMessage: "Password must be at least 6 characters" });
+    }
+
+    // Check if user already exists
+    const userExist = await user.findOne({ email });
+    if (userExist) {
+      return res.status(409).json({ errorMessage: "Email already exists" });
+    }
+
+    // Send welcome email
     const isMailSended = await sendEmail(
       email,
       mail.signUpMail.subject,
-      mail.signUpMail.content(name)
+      mail.signUpMail.content(name),
     );
-    if (isMailSended) {
-      const hashPassword = await bcrypt.hash(password, 10);
-      const formData = { name, email, phoneNo, password: hashPassword };
-      const data = await user.create(formData);
-      res
-        .status(201)
-        .json(data)
-        .then((data) => res.status(201).json(data))
-        .catch((err) => {
-          console.log(err);
-          return res
-            .status(200)
-            .json({ errorCode: 100, errorMessage: "Sorry Somthing Wrong" });
-        });
-    } else {
-      res
-        .status(200)
-        .json({ errorCode: 101, errorMessage: "Enter valid email!" });
+
+    if (!isMailSended) {
+      return res
+        .status(400)
+        .json({ errorMessage: "Failed to send email. Please try again." });
     }
+
+    // Hash password and create user
+    const hashPassword = await bcrypt.hash(password, 10);
+    const userData = await user.create({
+      name,
+      email,
+      phoneNo,
+      password: hashPassword,
+    });
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = userData.toObject();
+    res.status(201).json({
+      message: "User registered successfully",
+      user: userWithoutPassword,
+    });
+  } catch (err) {
+    console.error("SignUp error:", err);
+    res.status(500).json({ errorMessage: "Internal server error" });
   }
 };
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  if (email && password) {
-    const existUser = await user.findOne({ email: email });
-    if (existUser) {
-      const checkPassword = await bcrypt.compare(password, existUser.password);
-      if (checkPassword) {
-        const token = jwt.sign(
-          { userId: existUser._id, role: existUser.role },
-          process.env.JWT_AUTH_SECRET_KEY,
-          { expiresIn: "1d" }
-        );
-        res.status(201).json({ token: token, userData: existUser });
-      } else {
-        return res.status(200).json({ errorMessage: "Incorrect Password" });
-      }
-    } else {
-      return res.status(200).json({ errorMessage: "User not found" });
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ errorMessage: "Email and password are required" });
     }
-  } else {
-    return res.status(200).json({ errorMessage: "Fill all elements" });
+
+    const existUser = await user.findOne({ email }).select("+password");
+    if (!existUser) {
+      return res
+        .status(401)
+        .json({ errorMessage: "Invalid email or password" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, existUser.password);
+    if (!isPasswordValid) {
+      return res
+        .status(401)
+        .json({ errorMessage: "Invalid email or password" });
+    }
+
+    const token = jwt.sign(
+      { userData: existUser, role: existUser.role },
+      process.env.JWT_AUTH_SECRET_KEY,
+      { expiresIn: "7d" },
+    );
+
+    const { password: _, ...userWithoutPassword } = existUser.toObject();
+    res.status(200).json({
+      message: "Login successful",
+      token,
+      userData: userWithoutPassword,
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ errorMessage: "Internal server error" });
   }
 };
 
 exports.forgotPassword = async (req, res) => {
-  const { email, password } = req.body;
-  const hashPassword = await bcrypt.hash(password, 10);
-  user
-    .updateOne({ email }, { $set: { password: hashPassword } })
-    .then(() => {
-      res.status(201).json({ status: "updated" });
-    })
-    .catch((err) => {
-      console.log(err);
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
       return res
-        .status(200)
-        .json({ errorCode: 100, errorMessage: "Sorry Somthing Wrong" });
-    });
+        .status(400)
+        .json({ errorMessage: "Email and password are required" });
+    }
+
+    if (!validatePassword(password)) {
+      return res
+        .status(400)
+        .json({ errorMessage: "Password must be at least 6 characters" });
+    }
+
+    const hashPassword = await bcrypt.hash(password, 10);
+    const result = await user.findOneAndUpdate(
+      { email },
+      { password: hashPassword },
+      { new: true },
+    );
+
+    if (!result) {
+      return res.status(404).json({ errorMessage: "User not found" });
+    }
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    res.status(500).json({ errorMessage: "Internal server error" });
+  }
 };

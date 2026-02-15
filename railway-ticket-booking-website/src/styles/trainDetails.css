@@ -1,0 +1,178 @@
+.train-page {
+  background: #f4f7fb;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.train-header {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e6ecf3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.train-info h2 {
+  color: #0a3d62;
+  margin-bottom: 10px;
+}
+
+.availability-badge {
+  padding: 8px 14px;
+  border-radius: 20px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.badge-green {
+  background: #27ae60;
+}
+.badge-orange {
+  background: #f39c12;
+}
+.badge-red {
+  background: #e74c3c;
+}
+
+.booking-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.seat-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e6ecf3;
+}
+
+.seat {
+  padding: 12px;
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid #e6ecf3;
+  transition: all 0.3s ease;
+  background: #fff;
+}
+
+.seat:hover {
+  background: #f1c40f;
+  color: #000;
+}
+
+.seat-selected {
+  background: #0a3d62;
+  color: #fff;
+}
+
+.seat-booked {
+  background: #e74c3c;
+  color: #fff;
+  cursor: not-allowed;
+}
+
+.seat-disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.summary-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e6ecf3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.summary-card input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0 20px;
+  border-radius: 6px;
+  border: 1px solid #e6ecf3;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.total-price {
+  font-weight: 700;
+  color: #0a3d62;
+  border-top: 1px solid #e6ecf3;
+  padding-top: 10px;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  background: #0a3d62;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: #082c45;
+}
+
+.btn-disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.alert {
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  border: 1px solid #e6ecf3;
+}
+
+.alert-error {
+  background: #fdecea;
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
+}
+
+.alert-success {
+  background: #eafaf1;
+  color: #27ae60;
+  border: 1px solid #27ae60;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+  .booking-section {
+    flex-direction: row;
+  }
+
+  .seat-grid {
+    flex: 2;
+  }
+
+  .summary-card {
+    flex: 1;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .summary-card {
+    position: sticky;
+    top: 20px;
+  }
+}
